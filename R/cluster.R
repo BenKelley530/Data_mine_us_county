@@ -1,3 +1,15 @@
+# Question 1: What is going on here?
+
+#I believe that the goal of this report was to see if social vulnerability indices have explanatory power for changes in the overall composition of households (married vs unmarried family structures). The clustering helps to account for the possibility that the effects differ depending on which cities we are analyzing and seeks patterns in those differences. Unfortunately, the student actually just predicted changes in overall household count, using the indices as predictors, which does not answer the question he appears to be trying to address.
+
+# Question 2: Improvement
+
+#One major non-technical improvement that this student could make would be to just state the research question. It is difficult to infer what he is talking about and how relevant each of the (faily disparate) parts are to the project as a whole. Just writing down the question of interest would solve this easily.
+
+#One technical improvement that I will make is to improve the readability of the plot calling in the first chunk. There is a section where four plots are called with the exact same syntax. I will make this into a function and feed eight variables into the function to produce the four plots.
+
+# Code
+
 library(glue)
 library(Rtsne)
 library(RColorBrewer)
@@ -53,29 +65,28 @@ km_out <- kmeans(scaled_df[, -which(names(scaled_df) == 'NAME')], centers=4, nst
 table(km_out$cluster) 
 scaled_df[km_out$cluster == 3,] # Los Angeles is its own cluster!
 
+# In this section, the plot() function was called four times in order to create four very similar graphs. Here I condense this to a single function.
+
+plotkm <- function(varname, compare) {
+  for (i in 1:length(varname)){
+  plot(km_out$centers[, varname[i]],
+       km_out$centers[, compare[i]],
+       col = cols4, pch = 16)
+  }
+}
+
+# These specify the variables that each distinct plot will call
+
+varnames <- c('married.val_2022', 'unmarried.val_2022', 'married.slope_2022', 'no_curve_married')
+coms <- c('married.slope_2022', 'unmarried.slope_2022', 'unmarried.slope_2022', 'no_curve_unmarried')
+
+# These four commands call the plots
+
 cols4 <- brewer.pal(4, "Set1")
 png('kmeans_4_centers_slope.png')
 par(mfrow=c(2, 2))
-plot(km_out$centers[, 'married.val_2022'],
-     # km_out$centers[, 'unmarried.slope_2022'])
-     km_out$centers[, 'married.slope_2022'],
-     col=cols4, pch=16)
-legend("topleft", legend=1:4, fill=cols4)
-plot(km_out$centers[, 'unmarried.val_2022'],
-     # km_out$centers[, 'unmarried.slope_2022'])
-     km_out$centers[, 'unmarried.slope_2022'],
-     col=cols4, pch=16)
-legend("topleft", legend=1:4, fill=cols4)
-plot(km_out$centers[, 'married.slope_2022'],
-     # km_out$centers[, 'unmarried.slope_2022'])
-     km_out$centers[, 'unmarried.slope_2022'],
-     col=cols4, pch=16)
-legend("topleft", legend=1:4, fill=cols4)
-plot(km_out$centers[, 'no_curve_married'],
-     # km_out$centers[, 'unmarried.slope_2022'])
-     km_out$centers[, 'no_curve_unmarried'],
-     col=cols4, pch=16)
-legend("topleft", legend=1:4, fill=cols4)
+plotkm(varnames, coms)
+
 dev.off()
 
 
